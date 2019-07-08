@@ -9,8 +9,27 @@ theta_1 = 1
 theta_2 = 1.3
 theta_3 = 0.6
 theta_4 = 2*pi-(theta_2+theta_3)
-goal = np.array([4, 3, 1])
+goal = np.array([-3, 3, 4, 0.1, 0.2, 0.3])
 joints = 3
+pos_delta = np.array([0, 0, -1])
+
+
+class Directions(object):
+    speed = 10
+
+    def up(self, event):
+        global pos_delta
+        print("Up")
+        pos_delta[1] = 0
+        pos_delta[2] = 0
+        pos_delta[0] = self.speed
+        print(pos_delta)
+
+    def down(self, event):
+        global pos_delta
+        pos_delta[1] = 0
+        pos_delta[2] = 0
+        pos_delta[0] = -self.speed
 
 
 def DHframe(theta, d, a, alpha):
@@ -48,7 +67,7 @@ def model():
     global theta_4
     global goal
     global joints
-
+    global pos_delta
     # Creating each relative frame and each frame relative to the world frame
     frame_01 = DHframe(theta_1, 2, 0, pi/2)
     frame_12 = DHframe(theta_2, 0, 4, 0)
@@ -75,7 +94,7 @@ def model():
 
     # Calculate an appropriate change in position to solve for and put in into a column vector
     velocities = get_velocities([X[-1], Y[-1], Z[-1]], goal)
-    pos_delta = np.array(velocities[0:3]).transpose()
+    pos_delta = np.array(velocities[0:6]).transpose()
 
     # Solve IK utilising the pseudo inverse jacobian method
     theta_delta = jacobian.pseudo_inverse(frames, X, Y, Z, pos_delta)
