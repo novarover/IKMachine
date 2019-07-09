@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
 from matplotlib.widgets import Button
-import model
+import main
 import matplotlib
 
 # Required for updating without bringing the window to the front
@@ -19,7 +19,7 @@ fig.show()
 
 # Set up buttons
 ax_up = plt.axes([0.7, 0.05, 0.1, 0.075])
-callback = model.Directions()
+callback = main.Directions()
 # axnext = plt.axes([0.81, 0.05, 0.1, 0.075])
 button_up = Button(ax_up, 'Up')
 button_up.on_clicked(callback.up)
