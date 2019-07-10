@@ -23,7 +23,7 @@ def find_jacobian(frames, X, Y, Z, joints):
                 frames[i-1][[0, 1, 2], [2, 2, 2]]), np.array([X[-1]-X[i], Y[-1]-Y[i], Z[-1]-Z[i]])).transpose()
             jacobian_column = np.append(jacobian_column, z.transpose(), axis=0)
             jacobian = np.append(jacobian, jacobian_column, axis=1)
-            print(jacobian_column)
+            # print(jacobian_column)
     return jacobian
 
 
