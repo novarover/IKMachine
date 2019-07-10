@@ -7,14 +7,14 @@ from math import *
 
 # Forms the starting values
 theta_1 = 1
-theta_2 = -1
-theta_3 = 1
-theta_4 = 0
+theta_2 = 1.3
+theta_3 = 0.6
+theta_4 = 2*pi-(theta_2+theta_3)
 theta_5 = 0
 theta_6 = 0
 theta = [theta_1, theta_2, theta_3, theta_4, theta_5, theta_6]
 
-goal = np.array([-2, 2, 2, 0, 0, 0])
+goal = np.array([4, 3, 1, 0.2, 0.4, 0])
 joints = 6
 pos_delta = np.array([0, 0, -1])
 
@@ -23,12 +23,15 @@ class Directions(object):
     speed = 10
 
     def up(self, event):
+        return
         global pos_delta
+
         pos_delta[1] = 0
         pos_delta[2] = 0
         pos_delta[0] = self.speed
 
     def down(self, event):
+        return
         global pos_delta
         pos_delta[1] = 0
         pos_delta[2] = 0
@@ -46,7 +49,7 @@ def get_euler(rotation):
         x = atan2(-rotation[1, 2], rotation[1, 1])
         y = atan2(-rotation[2, 0], c)
         z = 0
-    print(z)
+
     return np.array([x, y, z])
 
 
@@ -72,7 +75,6 @@ def get_velocities(pos, goal, rotation):
     x_euler_delta = goal[3] - x_euler
     y_euler_delta = goal[4] - y_euler
     z_euler_delta = goal[5] - z_euler
-    print(z_euler_delta)
     velocities = [x_delta, y_delta, z_delta, x_euler_delta,
                   y_euler_delta, z_euler_delta, xy_dist, xyz_dist, z_theta]
     return velocities
@@ -123,14 +125,15 @@ def solve():
     #     [goal[0]-X[-1], goal[1]-Y[-1], goal[2] - Z[-1]]).transpose()
 
     # Calculate an appropriate change in position to solve for and put in into a column vector
-    velocities = get_velocities_DLS([X[-1], Y[-1], Z[-1]], goal, frames[-1])
-    pos_delta = np.array(velocities[0: 6]).transpose()
+    velocities = get_velocities([X[-1], Y[-1], Z[-1]], goal, frames[-1])
+    # pos_delta = np.array(velocities[0: 6]).transpose()
+    pos_delta = np.array(velocities[0:joints])
 
     # Solve IK utilising the pseudo inverse jacobian method
     theta_delta = jacobian.pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
     # Update the angles of each joint, uses division to further slow down the change
     for i in range(len(theta_delta)):
-        theta[i] = theta_delta[i]/1.0
+        theta[i] = theta[i]+theta_delta[i]/10.0
     time.sleep(0.01)
 
 
