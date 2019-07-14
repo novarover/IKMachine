@@ -18,7 +18,7 @@ def find_frames(theta):
 
     # Here is where the model is defined.
     # First relative frames
-    frame_01 = revolute_joint(theta[0], 2, 0, pi/2.0)  # base rotation
+    frame_01 = revolute_joint(theta[0], 0, 0, pi/2.0)  # base rotation
     frame_12 = revolute_joint(theta[1], 0, 4, 0)  # arm joint 1
     frame_23 = revolute_joint(theta[2], 0, 3, 0)  # arm joint 2
     frame_34 = revolute_joint(theta[3], 0, 0, pi/2.0)  # end effector up down

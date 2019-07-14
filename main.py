@@ -6,50 +6,47 @@ import model
 from math import *
 
 # Forms the starting values
-theta_1 = 1
-theta_2 = 1.3
-theta_3 = 0.6
-theta_4 = 2*pi-(theta_2+theta_3)
+theta_1 = 0  # 1
+theta_2 = 1  # 1.3
+theta_3 = -2  # 1.6
+theta_4 = 1  # 2*pi-(theta_2+theta_3)
 theta_5 = 0
 theta_6 = 0
 theta = [theta_1, theta_2, theta_3, theta_4, theta_5, theta_6]
+theta_max = 0.6
 
-goal = np.array([4, 3, 1, 0.2, 0.4, 0])
+goal = np.array([3.5, 0, 0, 0.2, 0.0, 0.0])   # 0.2,0.4,0.0
 joints = 6
-pos_delta = np.array([0, 0, -1])
+pos_delta = np.array([0.0, 0.2, 0.0, 0.0, 0.0, 0.0])
+speed = 0.1
 
 
-class Directions(object):
-    speed = 10
+def up(self):
+    global pos_delta
+    print("up")
+    pos_delta[1] = 0
+    pos_delta[2] = 0
+    pos_delta[0] = speed
 
-    def up(self, event):
-        return
-        global pos_delta
 
-        pos_delta[1] = 0
-        pos_delta[2] = 0
-        pos_delta[0] = self.speed
-
-    def down(self, event):
-        return
-        global pos_delta
-        pos_delta[1] = 0
-        pos_delta[2] = 0
-        pos_delta[0] = -self.speed
+def down(self):
+    global pos_delta
+    pos_delta[1] = 0
+    pos_delta[2] = 0
+    pos_delta[0] = speed
 
 
 def get_euler(rotation):
     c = sqrt(rotation[0, 0] * rotation[0, 0] + rotation[1, 0] * rotation[1, 0])
     singular = c < 1e-6
     if not singular:
-        y = atan2(-rotation[2, 0], c)
-        x = atan2(rotation[2, 1]/cos(y), rotation[2, 2]/cos(y))
-        z = atan2(rotation[1, 0]/cos(y), rotation[0, 0]/cos(y))
+        y = atan2(-rotation[2, 0], c)  # Pitch
+        x = atan2(rotation[2, 1], rotation[2, 2])  # Roll
+        z = atan2(rotation[1, 0], rotation[0, 0])  # Yaw
     else:
         x = atan2(-rotation[1, 2], rotation[1, 1])
         y = atan2(-rotation[2, 0], c)
         z = 0
-
     return np.array([x, y, z])
 
 
@@ -75,6 +72,7 @@ def get_velocities(pos, goal, rotation):
     x_euler_delta = goal[3] - x_euler
     y_euler_delta = goal[4] - y_euler
     z_euler_delta = goal[5] - z_euler
+
     velocities = [x_delta, y_delta, z_delta, x_euler_delta,
                   y_euler_delta, z_euler_delta, xy_dist, xyz_dist, z_theta]
     return velocities
@@ -101,14 +99,39 @@ def get_velocities_DLS(pos, goal, rotation):
     return velocities
 
 
+def update_theta(theta_delta):
+    global theta
+    global theta_max
+    global pos_delta
+    max_delta = np.amax(theta_delta)
+    alpha = 1
+    if max_delta > theta_max:
+        alpha = 1/(float(max_delta/theta_max))
+    for i in range(len(theta_delta)):
+        theta[i] = theta[i]+theta_delta[i]*alpha
+
+
 def solve():
 
     global goal
     global joints
     global pos_delta
-
+    import plotter
+    pos_delta = plotter.pos_delta
     global theta
     frames = model.find_frames(theta)
+    
+    # Drawing end effector claw
+    claw_1_r = model.revolute_joint(0.5,0,1,0)
+    claw_2_r = model.revolute_joint(-0.5,0,1,0)
+    claw_3_r = model.revolute_joint(0,0,1,pi/2.0)
+
+    claw_1 = np.matmul(frames[-1],claw_1_r)
+    claw_2 = np.matmul(frames[-1],claw_2_r)
+    claw_3 = np.matmul(frames[-1],claw_3_r)
+
+    claw_positions = [np.array(claw_1[[0,1,2],[3,3,3]])[0],np.array(claw_2[[0,1,2],[3,3,3]])[0],np.array(claw_3[[0,1,2],[3,3,3]])[0]]
+
     # Setting up the position vectors
     members = len(frames)
     X = np.zeros(members+1)
@@ -119,21 +142,17 @@ def solve():
         Y[i+1] = frames[i][1, 3]
         Z[i+1] = frames[i][2, 3]
 
-    plotter.plot(X, Y, Z, goal)
-
-    # pos_delta = np.array(
-    #     [goal[0]-X[-1], goal[1]-Y[-1], goal[2] - Z[-1]]).transpose()
+    plotter.plot(X, Y, Z, goal,claw_positions)
 
     # Calculate an appropriate change in position to solve for and put in into a column vector
     velocities = get_velocities([X[-1], Y[-1], Z[-1]], goal, frames[-1])
-    # pos_delta = np.array(velocities[0: 6]).transpose()
-    pos_delta = np.array(velocities[0:joints])
-
+    #pos_delta = np.array(velocities[0:joints])
+    # print(pos_delta)
     # Solve IK utilising the pseudo inverse jacobian method
-    theta_delta = jacobian.pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
+    theta_delta = jacobian.linear_solve(frames, X, Y, Z, pos_delta, joints)
+    print(theta_delta)
     # Update the angles of each joint, uses division to further slow down the change
-    for i in range(len(theta_delta)):
-        theta[i] = theta[i]+theta_delta[i]/10.0
+    update_theta(theta_delta)
     time.sleep(0.01)
 
 

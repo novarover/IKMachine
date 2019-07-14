@@ -59,3 +59,19 @@ def pseudo_inverse(frames, X, Y, Z, pos_delta, joints):
 def inverse(frames, X, Y, Z, pos_delta):
     # Look at utilising numpy's built in algebra solver?
     pass
+
+
+def linear_solve(frames, X, Y, Z, pos_delta, joints):
+     # Calls a gesv lapack routine and solves using forward and back substitution
+    jacobian = find_jacobian(frames, X, Y, Z, joints)
+
+    # Gives a pseudo version of the jacobian to solve for singular matrices
+    pseudo_jacobian = np.matmul(jacobian.transpose(), jacobian)
+
+    # Utilises the in-built numpy linear algebra solver, takes in A and b from A*x=b to return x
+    try:
+        theta_delta = np.linalg.solve(jacobian, pos_delta)
+    except:
+        theta_delta = pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
+        print("Except")
+    return theta_delta
