@@ -12,28 +12,28 @@ speed = 0.2
 
 
 def xp(self):
-    pos_delta[5] = pos_delta[5] + speed
+    pos_delta[0] = pos_delta[0] + speed
     print("up")
 
 
 def xn(self):
-    pos_delta[5] = pos_delta[5] - speed
+    pos_delta[0] = pos_delta[0] - speed
 
 
 def yp(self):
-    pos_delta[4] = pos_delta[4] + speed
+    pos_delta[1] = pos_delta[1] + speed
 
 
 def yn(self):
-    pos_delta[4] = pos_delta[4] - speed
+    pos_delta[1] = pos_delta[1] - speed
 
 
 def zp(self):
-    pos_delta[3] = pos_delta[3] + speed
+    pos_delta[2] = pos_delta[2] + speed
 
 
 def zn(self):
-    pos_delta[3] = pos_delta[3] - speed
+    pos_delta[2] = pos_delta[2] - speed
 
 
 # Required for updating without bringing the window to the front
@@ -85,10 +85,16 @@ def plot(X, Y, Z, goal, claw_positions):
     ax.set_xlim(-10, 10)
     ax.set_ylim(-10, 10)
     ax.set_zlim(-10, 10)
-    for claw in claw_positions:
-        claw_x = [X[-1], claw[0]]
-        claw_y = [Y[-1], claw[1]]
-        claw_z = [Z[-1], claw[2]]
+    for i in range(len(claw_positions)):
+        claw = claw_positions[i]
+        if i==0:
+            claw_x = [X[-1], claw[0]]
+            claw_y = [Y[-1], claw[1]]
+            claw_z = [Z[-1], claw[2]]
+        else:
+            claw_x = [claw_positions[0][0],claw[0]]
+            claw_y = [claw_positions[0][1],claw[1]]
+            claw_z = [claw_positions[0][2],claw[2]]
         ax.plot(claw_x, claw_y, claw_z, color="red")
     # Draw without bringing window to front
     fig.canvas.draw_idle()

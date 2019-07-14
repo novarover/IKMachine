@@ -68,10 +68,12 @@ def linear_solve(frames, X, Y, Z, pos_delta, joints):
     # Gives a pseudo version of the jacobian to solve for singular matrices
     pseudo_jacobian = np.matmul(jacobian.transpose(), jacobian)
 
-    # Utilises the in-built numpy linear algebra solver, takes in A and b from A*x=b to return x
-    try:
-        theta_delta = np.linalg.solve(jacobian, pos_delta)
-    except:
-        theta_delta = pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
-        print("Except")
+    # Utilises the in-built numpy line
+    # ar algebra solver, takes in A and b from A*x=b to return x
+    theta_delta = pseudo_inverse(frames,X,Y,Z,pos_delta,joints)
+    #try:
+    #    theta_delta = np.linalg.solve(jacobian, pos_delta)
+    #except:
+    #    theta_delta = pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
+    #    print("Except")
     return theta_delta

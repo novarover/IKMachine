@@ -19,10 +19,10 @@ def find_frames(theta):
     # Here is where the model is defined.
     # First relative frames
     frame_01 = revolute_joint(theta[0], 0, 0, pi/2.0)  # base rotation
-    frame_12 = revolute_joint(theta[1], 0, 4, 0)  # arm joint 1
-    frame_23 = revolute_joint(theta[2], 0, 3, 0)  # arm joint 2
+    frame_12 = revolute_joint(theta[1], 0, 7, 0)  # arm joint 1
+    frame_23 = revolute_joint(theta[2], 0, 7, 0)  # arm joint 2
     frame_34 = revolute_joint(theta[3], 0, 0, pi/2.0)  # end effector up down
-    frame_45 = revolute_joint(theta[4], 0, 2, 0)  # end effector left right
+    frame_45 = revolute_joint(theta[4], 0, 0, 0)  # end effector left right
     frame_56 = revolute_joint(0, 0, 0, theta[5])  # continuous rotation
     # Absolute frames are found through matrix multiplication
     frame_02 = np.matmul(frame_01, frame_12)
@@ -31,6 +31,12 @@ def find_frames(theta):
     frame_05 = np.matmul(frame_04, frame_45)
     frame_06 = np.matmul(frame_05, frame_56)
 
-    frames = [frame_01, frame_02, frame_03, frame_04, frame_05, frame_06]
+    # Rotation frame found from just the last 3 joints
+    frame_r_1 = np.matmul(frame_23, frame_34)
+    frame_r_2 = np.matmul(frame_r_1, frame_45)
+    frame_r = np.matmul(frame_r_2, frame_56)
+
+    frames = [frame_01, frame_02, frame_03,
+              frame_04, frame_05, frame_06, frame_r]
 
     return frames

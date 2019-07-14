@@ -23,7 +23,7 @@ speed = 0.1
 
 def up(self):
     global pos_delta
-    print("up")
+
     pos_delta[1] = 0
     pos_delta[2] = 0
     pos_delta[0] = speed
@@ -41,8 +41,8 @@ def get_euler(rotation):
     singular = c < 1e-6
     if not singular:
         y = atan2(-rotation[2, 0], c)  # Pitch
-        x = atan2(rotation[2, 1], rotation[2, 2])  # Roll
-        z = atan2(rotation[1, 0], rotation[0, 0])  # Yaw
+        x = atan2(rotation[2, 1]/cos(y), rotation[2, 2]/cos(y))  # Roll
+        z = atan2(rotation[1, 0]/cos(y), rotation[0, 0]/cos(y))  # Yaw
     else:
         x = atan2(-rotation[1, 2], rotation[1, 1])
         y = atan2(-rotation[2, 0], c)
@@ -119,18 +119,21 @@ def solve():
     import plotter
     pos_delta = plotter.pos_delta
     global theta
-    frames = model.find_frames(theta)
+    frames = model.find_frames(theta)[0:6]
+    rotation = model.find_frames(theta)[6]
     
     # Drawing end effector claw
-    claw_1_r = model.revolute_joint(0.5,0,1,0)
-    claw_2_r = model.revolute_joint(-0.5,0,1,0)
-    claw_3_r = model.revolute_joint(0,0,1,pi/2.0)
+    wrist_r = model.revolute_joint(0,0,1,0)
+    claw_1_r = model.revolute_joint(0.5,0,0.7,0)
+    claw_2_r = model.revolute_joint(-0.5,0,0.7,0)
+    claw_3_r = model.revolute_joint(0,0,0.7,pi/2.0)
 
-    claw_1 = np.matmul(frames[-1],claw_1_r)
-    claw_2 = np.matmul(frames[-1],claw_2_r)
-    claw_3 = np.matmul(frames[-1],claw_3_r)
+    wrist = np.matmul(frames[-1],wrist_r)
+    claw_1 = np.matmul(wrist,claw_1_r)
+    claw_2 = np.matmul(wrist,claw_2_r)
+    claw_3 = np.matmul(wrist,claw_3_r)
 
-    claw_positions = [np.array(claw_1[[0,1,2],[3,3,3]])[0],np.array(claw_2[[0,1,2],[3,3,3]])[0],np.array(claw_3[[0,1,2],[3,3,3]])[0]]
+    claw_positions = [np.array(wrist[[0,1,2],[3,3,3]])[0],np.array(claw_1[[0,1,2],[3,3,3]])[0],np.array(claw_2[[0,1,2],[3,3,3]])[0],np.array(claw_3[[0,1,2],[3,3,3]])[0]]
 
     # Setting up the position vectors
     members = len(frames)
@@ -145,7 +148,7 @@ def solve():
     plotter.plot(X, Y, Z, goal,claw_positions)
 
     # Calculate an appropriate change in position to solve for and put in into a column vector
-    velocities = get_velocities([X[-1], Y[-1], Z[-1]], goal, frames[-1])
+    velocities = get_velocities([X[-1], Y[-1], Z[-1]], goal, rotation)
     #pos_delta = np.array(velocities[0:joints])
     # print(pos_delta)
     # Solve IK utilising the pseudo inverse jacobian method
