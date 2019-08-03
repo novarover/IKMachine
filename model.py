@@ -2,6 +2,9 @@ import numpy as np
 import main
 from math import *
 
+max_limit = [2, 2, 2, 2, 2, 2]
+min_limit = [-2, -2, -3, -2, -1, -1]
+
 
 def revolute_joint(theta, d, a, alpha):
     # Returns the transformation frame for a standard revolute joint

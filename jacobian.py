@@ -1,5 +1,6 @@
 import numpy as np
 from math import *
+import weights
 
 
 def find_jacobian(frames, X, Y, Z, joints):
@@ -56,6 +57,37 @@ def pseudo_inverse(frames, X, Y, Z, pos_delta, joints):
     return theta_delta
 
 
+def pseudo_inverse_weights(frames, X, Y, Z, pos_delta, joints, theta):
+    jacobian = find_jacobian(frames, X, Y, Z, joints)
+    # print('ttt')
+    # print(jacobian)
+    weight = weights.find_weights(theta, jacobian)
+    # sqrt_weight = np.sqrt(weight)
+    # inverse_sqrt = np.linalg.inv(sqrt_weight)
+    # jw = np.matmul(jacobian, inverse_sqrt)
+
+    inverse_weight = np.linalg.inv(weight)
+    jacobian_t = jacobian.transpose()
+    print(jacobian)
+    print(jacobian_t)
+    part_1 = np.matmul(inverse_weight, jacobian_t)
+    weighted_jacobian_product = np.matmul(
+        jacobian, part_1)
+    inverse_weight = np.linalg.inv(weighted_jacobian_product)
+    pseudo_inverse = np.matmul(
+        np.matmul(inverse_weight, jacobian_t), inverse_weight)
+
+    # pseudo = np.linalg.pinv(jw)
+    # pseudo_inverse = np.matmul(inverse_sqrt, pseudo)
+
+    # Finds pseudo inverse of the jacobian utilising Moore-Penrose pseudo inverse
+    # pseudo_inverse=np.linalg.pinv(jacobian)
+    # Calculate required change in angles for each variable joint
+    theta_delta = np.matmul(pseudo_inverse, pos_delta)
+
+    return theta_delta
+
+
 def inverse(frames, X, Y, Z, pos_delta):
     # Look at utilising numpy's built in algebra solver?
     pass
@@ -64,16 +96,15 @@ def inverse(frames, X, Y, Z, pos_delta):
 def linear_solve(frames, X, Y, Z, pos_delta, joints):
      # Calls a gesv lapack routine and solves using forward and back substitution
     jacobian = find_jacobian(frames, X, Y, Z, joints)
-
     # Gives a pseudo version of the jacobian to solve for singular matrices
     pseudo_jacobian = np.matmul(jacobian.transpose(), jacobian)
 
     # Utilises the in-built numpy line
     # ar algebra solver, takes in A and b from A*x=b to return x
-    theta_delta = pseudo_inverse(frames,X,Y,Z,pos_delta,joints)
-    #try:
+    theta_delta = pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
+    # try:
     #    theta_delta = np.linalg.solve(jacobian, pos_delta)
-    #except:
+    # except:
     #    theta_delta = pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
     #    print("Except")
     return theta_delta
