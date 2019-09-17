@@ -3,6 +3,7 @@ import plotter
 import jacobian
 import time
 import model
+import weights
 from math import *
 
 # Forms the starting values
@@ -107,7 +108,6 @@ def update_theta(theta_delta):
     global pos_delta
     global raw_encoders
     max_delta = np.amax(theta_delta)
-    print(theta_delta)
     alpha = 1
     new_theta = [0.0,0.0,0.0,0.0,0.0,0.0]
     if max_delta > theta_max:
@@ -118,7 +118,6 @@ def update_theta(theta_delta):
             new_theta[i] = joint_limits[i]
         
     raw_encoders = model.find_encoder(new_theta) 
-    print(raw_encoders)
 #        theta[i] = new_theta
 
 
@@ -165,7 +164,7 @@ def solve():
     #pos_delta = np.array(velocities[0:joints])
     # print(pos_delta)
     # Solve IK utilising the pseudo inverse jacobian method
-    theta_delta = jacobian.linear_solve(frames, X, Y, Z, pos_delta, joints)
+    theta_delta = jacobian.pseudo_inverse_weights(frames, X, Y, Z, pos_delta, joints,theta)
     #print(theta_delta)
     # Update the angles of each joint, uses division to further slow down the change
     update_theta(theta_delta)
