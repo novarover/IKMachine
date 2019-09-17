@@ -14,7 +14,7 @@ theta_5 = 0
 theta_6 = 0
 theta = [theta_1, theta_2, theta_3, theta_4, theta_5, theta_6]
 raw_encoders = model.find_encoder(theta)
-joint_limits = [2*pi,pi/3,0,pi/3,pi/3,2*pi]
+joint_limits = [2*pi,2*pi,2*pi,2*pi,2*pi,2*pi]#[2*pi,pi/3,0,pi/3,pi/3,2*pi]
 theta_max = 0.6
 
 goal = np.array([3.5, 0, 0, 0.2, 0.0, 0.0])   # 0.2,0.4,0.0

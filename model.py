@@ -22,9 +22,9 @@ def find_frames(theta):
     frame_12 = revolute_joint(theta[1], 0, 7, 0)  # arm joint 1
     frame_23 = revolute_joint(theta[2], 0, 7, 0)  # arm joint 2
     # end effector left right
-    frame_34 = revolute_joint(theta[3], 0, 0, pi/2.0)
-    frame_45 = revolute_joint(theta[4], 0, 0, 0)  # end effector up down
-    frame_56 = revolute_joint(0, 0, 0, theta[5])  # continuous rotation
+    frame_34 = revolute_joint(theta[3], 0, 0, 0)
+    frame_45 = revolute_joint(theta[4], 0, 0, pi/2.0)  # end effector up down
+    frame_56 = revolute_joint(0, 0, 2, theta[5])  # continuous rotation
     # Absolute frames are found through matrix multiplication
     frame_02 = np.matmul(frame_01, frame_12)
     frame_03 = np.matmul(frame_02, frame_23)
