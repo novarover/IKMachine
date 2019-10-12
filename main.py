@@ -164,7 +164,7 @@ def solve():
     #pos_delta = np.array(velocities[0:joints])
     # print(pos_delta)
     # Solve IK utilising the pseudo inverse jacobian method
-    theta_delta = jacobian.pseudo_inverse_weights(frames, X, Y, Z, pos_delta, joints,theta)
+    theta_delta = jacobian.pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
     #print(theta_delta)
     # Update the angles of each joint, uses division to further slow down the change
     update_theta(theta_delta)
