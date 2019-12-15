@@ -43,7 +43,7 @@ def pseudo_inverse(frames, X, Y, Z, pos_delta, joints):
     # Utilises a Moore-Penrose pseudo inverse as an approximation. Can solve singular matrix jacobians where traditional inverse cannot.
     # Is faster and more efficient than an actual inverse, but not as accurate.
     jacobian = find_jacobian(frames, X, Y, Z, joints)
-
+    #print(jacobian)
     # Solving pseudo manually
     # pseudo_product = np.matmul(jacobian.transpose(), jacobian)
     # inverse_product = np.linalg.inv(pseudo_product)

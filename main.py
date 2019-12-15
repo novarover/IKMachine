@@ -114,11 +114,13 @@ def update_theta(theta_delta):
         alpha = 1/(float(max_delta/theta_max))
     for i in range(len(theta_delta)):
         new_theta[i] = theta[i]+theta_delta[i]*alpha
-        if new_theta[i] > joint_limits[i]:
-            new_theta[i] = joint_limits[i]
-        
+        #if new_theta[i] > joint_limits[i]:
+         #   new_theta[i] = joint_limits[i]
+    #print(new_theta)
+    new_theta[4] = theta[4]+theta_delta[4]*2
     raw_encoders = model.find_encoder(new_theta) 
 #        theta[i] = new_theta
+    #print(raw_encoders)
 
 
 def solve():
@@ -133,7 +135,7 @@ def solve():
     theta = model.find_theta(raw_encoders)
     frames = model.find_frames(theta)[0:6]
     rotation = model.find_frames(theta)[6]
-
+    #print(frames)
     # Drawing end effector claw
     wrist_r = model.revolute_joint(0,0,1,0)
     claw_1_r = model.revolute_joint(0.5,0,0.7,0)
@@ -165,9 +167,13 @@ def solve():
     # print(pos_delta)
     # Solve IK utilising the pseudo inverse jacobian method
     theta_delta = jacobian.pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
+    print(theta_delta)
+    
     #print(theta_delta)
-    # Update the angles of each joint, uses division to further slow down the change
+    # Update the angles of each joint, uses division to further slow down the changei
+   # theta_delta = plotter.pos_delta
     update_theta(theta_delta)
+
     time.sleep(0.01)
 
 
