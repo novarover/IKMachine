@@ -4,11 +4,11 @@ from math import *
 
 
 def revolute_joint(theta, d, a, alpha):
-    # Returns the transformation frame for a standard revolute joint
-    frame_array = np.mat([[cos(theta), -sin(theta)*cos(alpha), sin(theta)*sin(alpha), a*cos(theta)],
-                          [sin(theta), cos(theta)*cos(alpha),
-                           -cos(theta)*sin(alpha), a*sin(theta)],
-                          [0, sin(alpha), cos(alpha), d],
+    # Returns the transformation frame for a standard revolute joint (theta/alpha must be radians)
+    frame_array = np.mat([[cos(theta), -sin(theta), 0, a],
+                          [sin(theta)*cos(alpha), cos(theta)*cos(alpha),
+                           -sin(alpha), -sin(alpha)*d],
+                          [sin(theta)*sin(alpha), cos(theta)*sin(alpha), cos(alpha), cos(alpha)*d],
                           [0, 0, 0, 1]])
     return frame_array
 
@@ -18,31 +18,30 @@ def find_frames(theta):
 
     # Here is where the model is defined.
     # First relative frames
-    frame_01 = revolute_joint(theta[0], 0, 0, pi/2.0)  # base rotation
-    frame_12 = revolute_joint(theta[1], 0, 7, 0)  # arm joint 1
-    frame_23 = revolute_joint(theta[2], 0, 7, 0)  # arm joint 2
+    frame_01 = revolute_joint(theta[0], 0, 0, 0)  # base rotation
+    frame_12 = revolute_joint(theta[1], 0, 7.5, pi/2.0)  # arm joint 1
+    frame_23 = revolute_joint(theta[2], 0, 65, 0)  # arm joint 2
     # end effector left right
-    frame_34 = revolute_joint(theta[3], 0, 0, pi/2.0)
-    frame_45 = revolute_joint(theta[4], 0, 0, 0)  # end effector up down
-    frame_56 = revolute_joint(0, 0, 0, theta[5])  # continuous rotation
-    #frame_56 = revolute_joint(theta[5],0,3,0)
+    frame_34 = revolute_joint(theta[3], 0, 70, 0)
+    frame_45 = revolute_joint(theta[4], 0, 0, -pi/2.0)  # end effector up down
+    frame_56 = revolute_joint(theta[5], 0, 0, -pi/2.0)  # continuous rotation
+    #End effector from wrist
+    frame_67 = revolute_joint(0,25,0,0)
     # Absolute frames are found through matrix multiplication
     frame_02 = np.matmul(frame_01, frame_12)
     frame_03 = np.matmul(frame_02, frame_23)
     frame_04 = np.matmul(frame_03, frame_34)
     frame_05 = np.matmul(frame_04, frame_45)
     frame_06 = np.matmul(frame_05, frame_56)
-    print(theta[3])
-    print('!')
-    print(theta[4])
-    print('!')
+    frame_07 = np.matmul(frame_06, frame_67)
+
     # Rotation frame found from just the last 3 joints
-    frame_r_1 = np.matmul(frame_23, frame_34)
-    frame_r_2 = np.matmul(frame_r_1, frame_45)
-    frame_r = np.matmul(frame_r_2, frame_56)
+    #frame_r_1 = np.matmul(frame_23, frame_34)
+    #frame_r_2 = np.matmul(frame_r_1, frame_45)
+    #frame_r = np.matmul(frame_r_2, frame_56)
 
     frames = [frame_01, frame_02, frame_03,
-              frame_04, frame_05, frame_06, frame_r]
+              frame_04, frame_05, frame_06, frame_07]
 
     return frames
 

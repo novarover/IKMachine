@@ -8,13 +8,12 @@ from matplotlib.widgets import Button
 import main
 import matplotlib
 pos_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-speed = 0.2
+speed = 1
 
 
 def xp(self):
     pos_delta[0] = pos_delta[0] + speed
-    print("up")
-
+    
 
 def xn(self):
     pos_delta[0] = pos_delta[0] - speed
@@ -66,7 +65,7 @@ button_zn = Button(ax_zn, 'Z-')
 button_zn.on_clicked(zn)
 
 
-def plot(X, Y, Z, goal, claw_positions):
+def plot(X, Y, Z):
     # Clear plot each time its called and replot the arms
     ax.cla()
     ax.plot(X, Y, Z)
@@ -75,27 +74,17 @@ def plot(X, Y, Z, goal, claw_positions):
             markersize=3, color="blue")  # Plots the origin
     ax.plot([X[-1]], [Y[-1]], [Z[-1]], marker='o', markersize=3,
             color="red")  # Plots the end effector position
-    ax.plot([goal[0]], [goal[1]], [goal[2]],
-            marker='+', markersize=3, color="blue")  # Plots the target
-
+    ax.plot([X[-2]], [Y[-2]], [Z[-2]], marker='o', markersize=3,
+    color="blue")  # Plots the wrist position
+   
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_zlabel("Z")
 
-    ax.set_xlim(-10, 10)
-    ax.set_ylim(-10, 10)
-    ax.set_zlim(-10, 10)
-    for i in range(len(claw_positions)):
-        claw = claw_positions[i]
-        if i==0:
-            claw_x = [X[-1], claw[0]]
-            claw_y = [Y[-1], claw[1]]
-            claw_z = [Z[-1], claw[2]]
-        else:
-            claw_x = [claw_positions[0][0],claw[0]]
-            claw_y = [claw_positions[0][1],claw[1]]
-            claw_z = [claw_positions[0][2],claw[2]]
-        ax.plot(claw_x, claw_y, claw_z, color="red")
+    ax.set_xlim(-100, 100)
+    ax.set_ylim(-100, 100)
+    ax.set_zlim(-100, 100)
+
     # Draw without bringing window to front
     fig.canvas.draw_idle()
     fig.canvas.start_event_loop(0.001)
