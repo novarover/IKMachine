@@ -32,9 +32,9 @@ def find_jacobian(frames, X, Y, Z, joints):
     
     print(z)
     
-    print(P_end)
+    #print(P_end)
     
-    print(jacobian)
+    #print(jacobian)
 
     # for i in range(joints):
     #     # First joint utilizes z0 = [0,0,1] and origin position
