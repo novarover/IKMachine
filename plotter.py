@@ -8,7 +8,7 @@ from matplotlib.widgets import Button
 import main
 import matplotlib
 pos_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-speed = 1
+speed = 1 
 
 
 def xp(self):

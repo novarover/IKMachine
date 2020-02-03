@@ -30,7 +30,7 @@ def find_jacobian(frames, X, Y, Z, joints):
         jacobian[3:6,i] = z[0:3,i]
 
     
-    print(z)
+    #print(z)
     
     #print(P_end)
     
@@ -62,11 +62,14 @@ def pseudo_inverse(frames, X, Y, Z, pos_delta, joints):
     # Utilises a Moore-Penrose pseudo inverse as an approximation. Can solve singular matrix jacobians where traditional inverse cannot.
     # Is faster and more efficient than an actual inverse, but not as accurate.
     jacobian = find_jacobian(frames, X, Y, Z, joints)
-    print(jacobian)
+    #print(jacobian)
    
     # Finds pseudo inverse of the jacobian utilising Moore-Penrose pseudo inverse
     pseudo_inverse = np.linalg.pinv(jacobian)
 
     # Calculate required change in angles for each variable joint
     theta_delta = np.matmul(pseudo_inverse, pos_delta)
+
+    #Convert raw angular velocity to degrees
+    theta_delta = np.rad2deg(theta_delta)
     return theta_delta
