@@ -16,11 +16,12 @@ theta_5 = -90
 theta_6 = 0
 theta = np.array([theta_1, theta_2, theta_3, theta_4, theta_5, theta_6]) #numpy array
 #joint_limits = [2*pi,2*pi,2*pi,2*pi,2*pi,2*pi]
-theta_max = 5 #Max delta theta value allowed
+theta_max = 10 #Max delta theta value allowed
 
-#Intial Variables
+#Initial Variables
 joints = 6
-pos_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+DOF_in = 3
+pos_delta = np.array([0.0, 0.0, 0.0])
 
 
 #Function to update theta values using scaled delta_theta 
@@ -74,7 +75,7 @@ def solve():
 
 
     # Solve IK utilising the pseudo inverse jacobian method
-    theta_delta_raw = jacobian.pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
+    theta_delta_raw = jacobian.pseudo_inverse(frames, X, Y, Z, pos_delta, joints, DOF_in)
     #Return raw theta_delta values before weights
     #print(theta_delta)
     

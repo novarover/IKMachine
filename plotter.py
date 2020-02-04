@@ -7,7 +7,7 @@ from mpl_toolkits.mplot3d import axes3d
 from matplotlib.widgets import Button
 import main
 import matplotlib
-pos_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+pos_delta = np.array([0.0, 0.0, 0.0])
 speed = 1 
 
 

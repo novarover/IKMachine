@@ -3,17 +3,22 @@ from math import *
 import weights
 
 
-def find_jacobian(frames, X, Y, Z, joints):
+def find_jacobian(frames, X, Y, Z, joints,DOF_in):
     # Finds the jacobian with the given frames and positions relative to the world frame
 
     # Set up an empty 6 row matrix
-    jacobian = np.zeros([6,6])
+    jacobian = np.zeros([3,6])
     z = np.zeros([3,6])
 
     # For each joint, solve a jacobian column vector using formula jvi = zi-1 x (Op - Oi-1)
 
-    #End effector position
-    P_end=np.array([[X[-1], Y[-1], Z[-1]]])
+    #Select input DOF (3 or 6)
+    if (DOF_in == 6): 
+        #End effector position
+        P_end=np.array([[X[-1], Y[-1], Z[-1]]])
+    else:
+        #Wrist Position
+        P_end=np.array([[X[-4], Y[-4], Z[-4]]])
 
     #Loop through each theta
     for i in range(joints):
@@ -27,7 +32,7 @@ def find_jacobian(frames, X, Y, Z, joints):
         #print(P_end - o_i)
         jacobian[0:3,i] = np.cross(z[:,i],(P_end - o_i))
         #Calculate Jacobian for angular velocity
-        jacobian[3:6,i] = z[0:3,i]
+        #jacobian[3:6,i] = z[0:3,i]
 
     
     #print(z)
@@ -58,10 +63,10 @@ def find_jacobian(frames, X, Y, Z, joints):
     return jacobian
 
 
-def pseudo_inverse(frames, X, Y, Z, pos_delta, joints):
+def pseudo_inverse(frames, X, Y, Z, pos_delta, joints, DOF_in):
     # Utilises a Moore-Penrose pseudo inverse as an approximation. Can solve singular matrix jacobians where traditional inverse cannot.
     # Is faster and more efficient than an actual inverse, but not as accurate.
-    jacobian = find_jacobian(frames, X, Y, Z, joints)
+    jacobian = find_jacobian(frames, X, Y, Z, joints, DOF_in)
     #print(jacobian)
    
     # Finds pseudo inverse of the jacobian utilising Moore-Penrose pseudo inverse
