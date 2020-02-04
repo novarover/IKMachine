@@ -35,32 +35,7 @@ def find_frames(theta):
     frame_06 = np.matmul(frame_05, frame_56)
     frame_07 = np.matmul(frame_06, frame_67)
 
-    # Rotation frame found from just the last 3 joints
-    #frame_r_1 = np.matmul(frame_23, frame_34)
-    #frame_r_2 = np.matmul(frame_r_1, frame_45)
-    #frame_r = np.matmul(frame_r_2, frame_56)
-
     frames = [frame_01, frame_02, frame_03,
               frame_04, frame_05, frame_06, frame_07]
 
     return frames
-
-
-# Conversion table is from encoder value to theta
-conversion_table = [1.0,  # continuous rotation
-                    1.0,  # arm joint 1
-                    1.0,  # arm joint 2
-                    1.0,  # end effector left right
-                    1.0,  # end efffector up down
-                    1.0,  # continuous rotation
-                    ]
-
-
-def find_theta(feedback_encoder):
-    global conversion_table
-    return np.multiply(feedback_encoder, conversion_table)
-
-
-def find_encoder(output_theta):
-    global conversion_table
-    return np.true_divide(output_theta, conversion_table)

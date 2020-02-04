@@ -29,32 +29,6 @@ def find_jacobian(frames, X, Y, Z, joints):
         #Calculate Jacobian for angular velocity
         jacobian[3:6,i] = z[0:3,i]
 
-    
-    #print(z)
-    
-    #print(P_end)
-    
-    #print(jacobian)
-
-    # for i in range(joints):
-    #     # First joint utilizes z0 = [0,0,1] and origin position
-    #     if (i == 0):
-    #         z = np.array([[0, 0, 1]])
-    #         jacobian_column = np.cross(z, np.array(
-    #             [X[-1], Y[-1], Z[-1]])).transpose()
-    #         if joints > 3:
-    #             jacobian_column = np.append(
-    #                 jacobian_column, z.transpose(), axis=0)
-    #         jacobian = np.append(jacobian, jacobian_column, axis=1)
-    #     else:
-    #         z = np.array(frames[i-1][[0, 1, 2], [2, 2, 2]])
-    #         jacobian_column = np.cross(np.array(
-    #             frames[i-1][[0, 1, 2], [2, 2, 2]]), np.array([X[-1]-X[i], Y[-1]-Y[i], Z[-1]-Z[i]])).transpose()
-    #         if joints > 3:
-    #             jacobian_column = np.append(
-    #                 jacobian_column, z.transpose(), axis=0)
-    #         jacobian = np.append(jacobian, jacobian_column, axis=1)
-
     return jacobian
 
 
