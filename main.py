@@ -22,6 +22,19 @@ theta_max = 5 #Max delta theta value allowed (deg/s)
 joints = 6
 pos_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
+def clamp(theta):
+    dimensions = len(theta)
+    H = np.zeros((dimensions, dimensions))
+    qmin=[-90,-30,-180,-180,-180,-180]
+    qmax=[90,120,180,180,180,180]
+
+    for i in range(dimensions):
+        if (theta[i]>=qmax[i])|(theta[i]<=qmin[i]):
+            H[i,i]=0
+        else:  
+            H[i,i]=1
+    return H
+
 
 #Function to update theta values using scaled delta_theta 
 def update_theta(theta_delta_raw):
@@ -34,6 +47,9 @@ def update_theta(theta_delta_raw):
     alpha = 1
     new_theta = [0.0,0.0,0.0,0.0,0.0,0.0]
     theta_delta = [0.0,0.0,0.0,0.0,0.0,0.0]
+   
+    H = clamp(theta)
+    theta_delta_raw = np.dot(H,theta_delta_raw)
 
     if max_delta > theta_max:
         alpha = 1/(float(max_delta/theta_max))
@@ -42,6 +58,9 @@ def update_theta(theta_delta_raw):
         theta_delta[i] = theta_delta_raw[i]*alpha
         new_theta[i] = theta[i]+theta_delta[i]
     
+    
+    
+
     #Assign updated theta values
     theta = new_theta 
 
