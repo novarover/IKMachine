@@ -1,18 +1,33 @@
 import numpy as np
-import model
+import main
 from math import *
 
-previous_weights = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+def find_weights(theta):
+    global qmin
+    global qmax
+    global H_prev
 
+    qmax = main.qmax
+    qmin = main.qmin
+    H_prev = main.H_prev
 
-def find_weights(theta, jacobian):
-    dimensions = len(theta)
-    weight = np.zeros((dimensions, dimensions))
-    for i in range(dimensions):
+    n = len(theta)
+    m=2
+    W = np.zeros((n, n))
+    dH = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    
+    for i in range(n):
         theta_i = theta[i]
-        theta_max = model.max_limit[i]
-        theta_min = model.min_limit[i]
-        H = pow((theta_max-theta_min), 2)*(2*theta_i-theta_max-theta_min) / \
-            (2*dimensions*pow((theta_max-theta_i), 2)*pow((theta_i-theta_min), 2))
-        weight[i, i] = 1+abs(H)
-    return weight
+        
+        dH[i] = pow((qmax[i]-qmin[i]), 2)*(2*theta_i-qmax[i]-qmin[i]) / \
+        (2*m*pow((qmax[i]-theta_i), 2)*pow((theta_i-qmin[i]), 2))
+        #dH[i] = dH[i]/
+
+        if (abs(dH[i])-abs(H_prev[i])>=0):
+            W[i, i] = 1+abs(dH[i])
+        else:
+            W[i,i]=1
+
+        H_prev[i]=dH[i]
+
+    return W

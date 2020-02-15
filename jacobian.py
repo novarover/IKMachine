@@ -1,5 +1,6 @@
 import numpy as np
 from math import *
+from scipy.linalg import fractional_matrix_power
 import weights
 
 
@@ -32,14 +33,16 @@ def find_jacobian(frames, X, Y, Z, joints):
     return jacobian
 
 
-def pseudo_inverse(frames, X, Y, Z, pos_delta, joints):
+def pseudo_inverse(frames, X, Y, Z, pos_delta, W, joints):
     # Utilises a Moore-Penrose pseudo inverse as an approximation. Can solve singular matrix jacobians where traditional inverse cannot.
     # Is faster and more efficient than an actual inverse, but not as accurate.
     jacobian = find_jacobian(frames, X, Y, Z, joints)
-    #print(jacobian)
-   
+    
+    #Weighted Jacobian
+    jacobian_W = np.matmul(jacobian,fractional_matrix_power(W,0.5))
+
     # Finds pseudo inverse of the jacobian utilising Moore-Penrose pseudo inverse
-    pseudo_inverse = np.linalg.pinv(jacobian)
+    pseudo_inverse = np.linalg.pinv(jacobian_W)
 
     # Calculate required change in angles for each variable joint
     theta_delta = np.matmul(pseudo_inverse, pos_delta)

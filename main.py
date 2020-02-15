@@ -15,22 +15,28 @@ theta_4 = 0
 theta_5 = -90
 theta_6 = 0
 
+#Define globla variables
 theta = np.array([theta_1, theta_2, theta_3, theta_4, theta_5, theta_6]) #numpy array
-theta_max = 5 #Max delta theta value allowed (deg/s)
+theta_max = 2 #Max delta theta value allowed (deg/s)
+
+qmin=[-90,-30,-181,-181,-181,-181]
+qmax=[90,120,181,181,181,181]
+H_prev = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
 #Initial Variables
 joints = 6
 pos_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
 def clamp(theta):
+    global qmin
+    global qmax
+
     dimensions = len(theta)
     H = np.zeros((dimensions, dimensions))
-    qmin=[-90,-30,-180,-180,-180,-180]
-    qmax=[90,120,180,180,180,180]
-
+    
     for i in range(dimensions):
-        if (theta[i]>=qmax[i])|(theta[i]<=qmin[i]):
-            H[i,i]=0
+        if (theta[i]>=qmax[i]+2)|(theta[i]<=qmin[i]-2):
+            H[i,i]=0      
         else:  
             H[i,i]=1
     return H
@@ -40,10 +46,9 @@ def clamp(theta):
 def update_theta(theta_delta_raw):
     global theta
     global theta_max
-    global pos_delta
 
     # Limit change in theta values using proportional weights (alpha)
-    max_delta = np.amax(theta_delta_raw)
+    max_delta = np.amax(abs(theta_delta_raw))
     alpha = 1
     new_theta = [0.0,0.0,0.0,0.0,0.0,0.0]
     theta_delta = [0.0,0.0,0.0,0.0,0.0,0.0]
@@ -57,21 +62,28 @@ def update_theta(theta_delta_raw):
     for i in range(len(theta_delta_raw)):
         theta_delta[i] = theta_delta_raw[i]*alpha
         new_theta[i] = theta[i]+theta_delta[i]
+        new_theta[i] = wrapTo180(new_theta[i])
     
-    
-    
-
     #Assign updated theta values
     theta = new_theta 
 
     return theta_delta
 
+def wrapTo180(angle):
+    angle = angle % 360
+    angle = (angle + 360) % 360
+
+    if (angle > 180):
+        angle = angle - 360
+
+    return angle
 
 def solve():
     import plotter
     global joints
     global theta
     global pos_delta
+    
     pos_delta = plotter.pos_delta
     
     #Calculate Frames for given theta (convert to rad for trig functions)
@@ -89,15 +101,20 @@ def solve():
     
     plotter.plot(X, Y, Z)
 
+    #Return joint limit weights for given theta value
+    W = weights.find_weights(theta)
+
     # Solve IK utilising the pseudo inverse jacobian method
     #Return raw theta_delta values before weights
-    theta_delta_raw = jacobian.pseudo_inverse(frames, X, Y, Z, pos_delta, joints)
+    theta_delta = jacobian.pseudo_inverse(frames, X, Y, Z, pos_delta, W, joints)
     
+    
+    print(theta[1])
 
     # Update the angles of each joint, uses weighting to reduce delta theta values to limit
-    theta_delta = update_theta(theta_delta_raw)
+    theta_delta = update_theta(theta_delta)
 
-    time.sleep(0.01)
+    #time.sleep(0.01)
     
     return theta_delta
 
