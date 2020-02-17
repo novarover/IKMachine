@@ -3,50 +3,48 @@ from math import *
 from scipy.linalg import fractional_matrix_power
 import weights
 
-
-def find_jacobian(frames, X, Y, Z, joints):
-    # Finds the jacobian with the given frames and positions relative to the world frame
-
-    # Set up an empty 6 row matrix
+#Finds the jacobian with the given frames and positions relative to the world frame
+def find_jacobian(frames):
+    #Set up an empty 6 row matrix
     jacobian = np.zeros([6,6])
     z = np.zeros([3,6])
 
-    # For each joint, solve a jacobian column vector using formula jvi = zi-1 x (Op - Oi-1)
-
     #End effector position
-    P_end=np.array([[X[-1], Y[-1], Z[-1]]])
+    P_end=np.array(frames[-1][[0, 1, 2], [3, 3, 3]])
 
-    #Loop through each theta
-    for i in range(joints):
+    #For each joint, solve a jacobian column vector using formula jvi = zi-1 x (Op - Oi-1)
+    #Loop through each joint
+    for i in range(6):
         #Extract z column from each frame
         z[:,i] = np.array(frames[i][[0, 1, 2], [2, 2, 2]])
+
         #Find frame position respect to origin
         o_i = np.array(frames[i][[0, 1, 2], [3, 3, 3]])
+
         #Calculate Jacobian for Revolute joints (linear velocity)
-        #print(jacobian[0:3,i])
-        #print(z[:,i])
-        #print(P_end - o_i)
         jacobian[0:3,i] = np.cross(z[:,i],(P_end - o_i))
+
         #Calculate Jacobian for angular velocity
         jacobian[3:6,i] = z[0:3,i]
 
     return jacobian
 
 
-def pseudo_inverse(frames, X, Y, Z, pos_delta, W, joints):
-    # Utilises a Moore-Penrose pseudo inverse as an approximation. Can solve singular matrix jacobians where traditional inverse cannot.
-    # Is faster and more efficient than an actual inverse, but not as accurate.
-    jacobian = find_jacobian(frames, X, Y, Z, joints)
+def pseudo_inverse(frames, pos_delta, W):
+    #Utilises a Moore-Penrose pseudo inverse as an approximation. Can solve singular matrix jacobians where traditional inverse cannot.
+    #Is faster and more efficient than an actual inverse, but not as accurate.
+    jacobian = find_jacobian(frames)
     
     #Weighted Jacobian
     jacobian_W = np.matmul(jacobian,fractional_matrix_power(W,0.5))
 
-    # Finds pseudo inverse of the jacobian utilising Moore-Penrose pseudo inverse
+    #Finds pseudo inverse of the weighted jacobian utilising Moore-Penrose pseudo inverse
     pseudo_inverse = np.linalg.pinv(jacobian_W)
 
-    # Calculate required change in angles for each variable joint
+    #Calculate required change in angles for each variable joint
     theta_delta = np.matmul(pseudo_inverse, pos_delta)
 
     #Convert raw angular velocity to degrees
     theta_delta = np.rad2deg(theta_delta)
+    
     return theta_delta
