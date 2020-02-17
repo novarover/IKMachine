@@ -48,3 +48,4 @@ def pseudo_inverse(frames, pos_delta, W):
     theta_delta = np.rad2deg(theta_delta)
     
     return theta_delta
+

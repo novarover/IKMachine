@@ -25,7 +25,7 @@ if sim == 1:
 
 #Max delta theta value allowed (deg/s)
 #Prevents large angle changes at workspace limit
-theta_max = 2 
+theta_max = 10 
 
 #Define joint limits for each angle [-180,180]
 #Unlimited joints given 181 degree to avoid INF value on asymptote
@@ -150,7 +150,7 @@ def simulation():
     #Return theta_delta values after applying weights to joints
     theta_delta = jacobian.pseudo_inverse(frames, pos_delta, W)
     
-    print(theta[0])
+    #print(theta[0])
  
     #Update the angles of each joint, uses weighting to reduce delta theta values to limit
     theta_delta = update_theta(theta_delta)
