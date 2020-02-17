@@ -20,7 +20,7 @@ theta_max = 10 #Max delta theta value allowed
 
 #Initial Variables
 joints = 6
-DOF_in = 6
+DOF_in = 3
 pos_delta = np.array([0.0, 0.0, 0.0])
 
 
