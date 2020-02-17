@@ -33,6 +33,7 @@ def find_jacobian(frames):
 def pseudo_inverse(frames, pos_delta, W):
     #Utilises a Moore-Penrose pseudo inverse as an approximation. Can solve singular matrix jacobians where traditional inverse cannot.
     #Is faster and more efficient than an actual inverse, but not as accurate.
+   
     jacobian = find_jacobian(frames)
     
     #Weighted Jacobian
@@ -46,6 +47,6 @@ def pseudo_inverse(frames, pos_delta, W):
 
     #Convert raw angular velocity to degrees
     theta_delta = np.rad2deg(theta_delta)
-    
+
     return theta_delta
 
