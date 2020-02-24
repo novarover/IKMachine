@@ -25,12 +25,12 @@ if sim == 1:
 
 #Max delta theta value allowed (deg/s)
 #Prevents large angle changes at workspace limit
-theta_max = 10 
+theta_max = 5 
 
 #Define joint limits for each angle [-180,180]
 #Unlimited joints given 181 degree to avoid INF value on asymptote
-qmin=[-90,-30,-181,-181,-181,-181]
-qmax=[90,120,181,181,181,181]
+qmin=[-90,-181,-181,-181,-181,-181]
+qmax=[90,181,181,181,181,181]
 
 
 
@@ -70,7 +70,7 @@ def clamp(theta):
     
     for i in range(dimensions):
         if (theta[i]>=qmax[i]+2)|(theta[i]<=qmin[i]-2):
-            H[i,i]=0
+            #H[i,i]=0
             print('Clamped')    
         else:  
             H[i,i]=1
