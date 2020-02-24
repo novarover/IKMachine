@@ -40,3 +40,9 @@ def find_frames(theta):
               frame_04, frame_05, frame_06, frame_07]
 
     return frames
+
+def xyz_reframe(pos_delta, base_theta):
+    frame10 = revolute_joint(base_theta, 0, 0, 0)
+    
+
+    return pos_reframe
