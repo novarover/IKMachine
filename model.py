@@ -42,7 +42,10 @@ def find_frames(theta):
     return frames
 
 def xyz_reframe(pos_delta, base_theta):
-    frame10 = revolute_joint(base_theta, 0, 0, 0)
-    
+
+    frame10 = revolute_joint(np.deg2rad(base_theta), 0, 0, 0)
+    frame10 = frame10[0:3,0:3]
+
+    pos_reframe = np.matmul(frame10,pos_delta)
 
     return pos_reframe

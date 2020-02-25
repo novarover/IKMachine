@@ -11,7 +11,7 @@ from math import *
 sim = 1
 
 #Define the starting values of theta (degrees)
-theta_1 = 0  
+theta_1 = 45  
 theta_2 = 90  
 theta_3 = -90
 theta_4 = 0
@@ -25,14 +25,14 @@ if sim == 1:
 
 #Max delta theta value allowed (deg/s)
 #Prevents large angle changes at workspace limit
-theta_max = 5 
+theta_max = 15 
 
 #Define joint limits for each angle [-180,180]
 #Unlimited joints given 181 degree to avoid INF value on asymptote
 qmin=[-90,-181,-181,-181,-181,-181]
 qmax=[90,181,181,181,181,181]
 
-
+pos_adapt = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
 #Function to read theta input from encoders
 def input_theta():
@@ -126,7 +126,12 @@ def simulation():
     
     #Read velocities from buttons
     pos_delta = plotter.pos_delta
-    
+    print(pos_delta)
+
+    #Adaptive reference frame
+    pos_adapt[0:3] = model.xyz_reframe(pos_delta[0:3], 45)
+    print(pos_adapt)
+
     #Calculate Frames for given theta (convert to rad for trig functions)
     frames = model.find_frames(np.deg2rad(theta))[0:7]
     
@@ -148,7 +153,7 @@ def simulation():
 
     #Solve IK utilising the pseudo inverse jacobian method
     #Return theta_delta values after applying weights to joints
-    theta_delta = jacobian.pseudo_inverse(frames, pos_delta, W)
+    theta_delta = jacobian.pseudo_inverse(frames, pos_adapt, W)
     
     #print(theta[0])
  
