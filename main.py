@@ -7,11 +7,9 @@ import model
 import weights
 from math import *
 
-#Toggle simulation (0 for rover implementation)
-sim = 1
 
 #Define the starting values of theta (degrees)
-theta_1 = 45  
+theta_1 = -179  
 theta_2 = 90  
 theta_3 = -90
 theta_4 = 0
@@ -19,44 +17,26 @@ theta_5 = -90
 theta_6 = 0
 
 #Define global variables
-if sim == 1:    
-    theta = np.array([theta_1, theta_2, theta_3, theta_4, theta_5, theta_6]) 
-    pos_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+theta = np.array([theta_1, theta_2, theta_3, theta_4, theta_5, theta_6]) 
+pos_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+pos_adapt = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
 #Max delta theta value allowed (deg/s)
 #Prevents large angle changes at workspace limit
-theta_max = 15 
+theta_max = 15  #Testing Variable
 
 #Define joint limits for each angle [-180,180]
-#Unlimited joints given 181 degree to avoid INF value on asymptote
-qmin=[-90,-181,-181,-181,-181,-181]
-qmax=[90,181,181,181,181,181]
+#Unlimited joints given 360 degree to avoid INF value on asymptote and allow limit rollover
+qmin=[-1000,-1000,-1000,-1000,-1000,-1000] #Testing Variable
+qmax=[1000,1000,1000,1000,1000,1000]
 
-pos_adapt = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-
-#Function to read theta input from encoders
-def input_theta():
-
-    theta = np.array([0.0, 90.0, -90.0, 0.0, -90.0, 0.0])
-
-    return theta
-
-
-#Function to read velocity input from joysticks
-def input_posdelta():
-
-    pos_delta = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
-
-    return pos_delta
-
-
-#Function to output theta_delta command
-def output_thetadelta(theta_delta):
-
-    theta_delta_out = theta_delta
-
-    return theta_delta_out
-
+#Define Toggles (1 for On, 0 for Off)
+#Toggle for clamping feature if joint limit is exceeded
+clamping = 0
+#Toggle for adaptive ref frame
+adpt_frame = 0
+#Toggle for joint limits
+joint_limit = 1
 
 
 #Function to clamp joint if it exceeds joint limit by 2 degrees
@@ -65,12 +45,13 @@ def clamp(theta):
     global qmin
     global qmax
 
+    limit = 2  #Testing Variable
     dimensions = len(theta)
     H = np.zeros((dimensions, dimensions))
     
     for i in range(dimensions):
-        if (theta[i]>=qmax[i]+2)|(theta[i]<=qmin[i]-2):
-            #H[i,i]=0
+        if (theta[i]>=qmax[i]+limit)|(theta[i]<=qmin[i]-limit):
+            H[i,i]=0
             print('Clamped')    
         else:  
             H[i,i]=1
@@ -98,10 +79,12 @@ def update_theta(theta_delta_raw):
     alpha = 1
     new_theta = [0.0,0.0,0.0,0.0,0.0,0.0]
     theta_delta = [0.0,0.0,0.0,0.0,0.0,0.0]
-   
+    
+    
     #Check for joint limit breach and clamp if required
-    H = clamp(theta)
-    theta_delta_raw = np.dot(H,theta_delta_raw)
+    if clamping == 1:
+        H = clamp(theta)
+        theta_delta_raw = np.dot(H,theta_delta_raw)
 
     #Compare max delta_theta value to max allowed value (deg/s)
     if max_delta > theta_max: 
@@ -119,18 +102,20 @@ def update_theta(theta_delta_raw):
 
 
 #Looping function for model simulation
-def simulation():
+def solve():
     import plotter
     global theta
     global pos_delta
     
     #Read velocities from buttons
     pos_delta = plotter.pos_delta
-    print(pos_delta)
 
-    #Adaptive reference frame
-    pos_adapt[0:3] = model.xyz_reframe(pos_delta[0:3], 45)
-    print(pos_adapt)
+    #Adaptive reference frame option
+    if adpt_frame == 1:
+        pos_adapt[0:3] = model.xyz_reframe(pos_delta[0:3], theta_1)  #Read intial base rotation angle to pass into reframe function
+    else:
+        pos_adapt[0:3] = pos_delta[0:3]
+
 
     #Calculate Frames for given theta (convert to rad for trig functions)
     frames = model.find_frames(np.deg2rad(theta))[0:7]
@@ -149,67 +134,29 @@ def simulation():
     plotter.plot(X, Y, Z)
 
     #Return joint limit weights for given theta value
-    W = weights.find_weights(theta)
+    if joint_limit == 1:
+        W = weights.find_weights(theta)
+    else:
+        W = np.identity(6)
 
     #Solve IK utilising the pseudo inverse jacobian method
     #Return theta_delta values after applying weights to joints
     theta_delta = jacobian.pseudo_inverse(frames, pos_adapt, W)
     
-    #print(theta[0])
- 
     #Update the angles of each joint, uses weighting to reduce delta theta values to limit
     theta_delta = update_theta(theta_delta)
 
     #time.sleep(0.01)
-    
+    print(W[0,0])
     return theta_delta
-
-
-
-#Code for one iteration of IK, implemented on rover
-def IK_rover():
-    global theta
-    global pos_delta
-    
-    #Read angle from encoder
-    theta = input_theta()
-    print(theta)
-
-    #Read velocities from joysticks
-    pos_delta = input_posdelta()
-
-    #Calculate Frames for given theta (convert to rad for trig functions)
-    frames = model.find_frames(np.deg2rad(theta))[0:7]
-    
-    #Return joint limit weights for given theta value
-    W = weights.find_weights(theta)
-
-    #Solve IK utilising the pseudo inverse jacobian method
-    #Return theta_delta values after applying weights to joints
-    theta_delta = jacobian.pseudo_inverse(frames, pos_delta, W)
-    
-    #Update the angles of each joint, uses weighting to reduce delta theta values to limit
-    theta_delta = update_theta(theta_delta)
-
-    #Output theta_delta
-    output_thetadelta(theta_delta)
-
-    print(theta)
-
-    #Repeat every 10ms (100Hz)
-    time.sleep(0.01)
-
-    return
-
 
 
 #Loop in simulation or implementation
 def main():
-    while sim==1:
-        simulation()
 
-    while sim==0:
-        IK_rover()
+    while True:
+        solve()
+
 
 
 if __name__ == "__main__":

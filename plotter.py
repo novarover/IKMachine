@@ -12,7 +12,7 @@ import matplotlib
 pos_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
 #Speed change per button press
-speed = 2.0 
+speed = 1.0 
 
 def xp(self):
     pos_delta[0] = pos_delta[0] + speed
