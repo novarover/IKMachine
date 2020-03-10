@@ -10,8 +10,11 @@ def find_jacobian(frames, joints):
     z = np.zeros([3,6])
 
     #End effector position
-    P_end=np.array(frames[-1][[0, 1, 2], [3, 3, 3]])
-
+    if joints == 6:
+        P_end=np.array(frames[-1][[0, 1, 2], [3, 3, 3]])
+    else:
+        P_end=np.array(frames[-4][[0, 1, 2], [3, 3, 3]])
+        
     #For each joint, solve a jacobian column vector using formula jvi = zi-1 x (Op - Oi-1)
     #Loop through each joint
     for i in range(joints):

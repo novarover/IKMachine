@@ -20,6 +20,7 @@ theta_6 = 0
 theta = np.array([theta_1, theta_2, theta_3, theta_4, theta_5, theta_6]) 
 pos_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 pos_adapt = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+theta_delta = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
 #Max delta theta value allowed (deg/s)
 #Prevents large angle changes at workspace limit
@@ -80,8 +81,8 @@ def update_theta(theta_delta_raw):
     #Limit change in theta values using proportional weights (alpha)
     max_delta = np.amax(abs(theta_delta_raw))
     alpha = 1
-    new_theta = [0.0,0.0,0.0,0.0,0.0,0.0]
-    theta_delta = [0.0,0.0,0.0,0.0,0.0,0.0]
+    new_theta = np.zeros(joints)
+    theta_delta = np.zeros(joints)
     
     #Check for joint limit breach and clamp if required
     if clamping == 1:
@@ -98,7 +99,7 @@ def update_theta(theta_delta_raw):
         new_theta[i] = wrapTo180(new_theta[i])    #Wrap new angles to [-180,180]
     
     #Assign updated theta values 
-    theta = new_theta 
+    theta[0:joints] = new_theta 
 
     return theta_delta
 
@@ -148,7 +149,7 @@ def solve():
     
     #Update the angles of each joint, uses weighting to reduce delta theta values to limit
     theta_delta = update_theta(theta_delta)
-
+################################################# Mode breaking here?
     #time.sleep(0.01)
     
     return theta_delta
