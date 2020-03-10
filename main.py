@@ -80,9 +80,8 @@ def update_theta(theta_delta_raw):
     #Limit change in theta values using proportional weights (alpha)
     max_delta = np.amax(abs(theta_delta_raw))
     alpha = 1
-    new_theta = theta
+    new_theta = [0.0,0.0,0.0,0.0,0.0,0.0]
     theta_delta = [0.0,0.0,0.0,0.0,0.0,0.0]
-    
     
     #Check for joint limit breach and clamp if required
     if clamping == 1:
