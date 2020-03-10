@@ -9,7 +9,7 @@ from math import *
 
 
 #Define the starting values of theta (degrees)
-theta_1 = -179  
+theta_1 = 0  
 theta_2 = 90  
 theta_3 = -90
 theta_4 = 0
@@ -27,8 +27,8 @@ theta_max = 15  #Testing Variable
 
 #Define joint limits for each angle [-180,180]
 #Unlimited joints given 360 degree to avoid INF value on asymptote and allow limit rollover
-qmin=[-1000,-1000,-1000,-1000,-1000,-1000] #Testing Variable
-qmax=[1000,1000,1000,1000,1000,1000]
+qmin=[-90,-1000,-1000,-1000,-1000,-1000] #Testing Variable
+qmax=[90,1000,1000,1000,1000,1000]
 
 #Define Toggles (1 for On, 0 for Off)
 #Toggle for clamping feature if joint limit is exceeded
@@ -36,7 +36,10 @@ clamping = 0
 #Toggle for adaptive ref frame
 adpt_frame = 0
 #Toggle for joint limits
-joint_limit = 1
+joint_limit = 0
+
+#Mode Select Variable (6DOF or 3DOF)
+joints = 6
 
 
 #Function to clamp joint if it exceeds joint limit by 2 degrees
@@ -46,7 +49,7 @@ def clamp(theta):
     global qmax
 
     limit = 2  #Testing Variable
-    dimensions = len(theta)
+    dimensions = joints
     H = np.zeros((dimensions, dimensions))
     
     for i in range(dimensions):
@@ -77,7 +80,7 @@ def update_theta(theta_delta_raw):
     #Limit change in theta values using proportional weights (alpha)
     max_delta = np.amax(abs(theta_delta_raw))
     alpha = 1
-    new_theta = [0.0,0.0,0.0,0.0,0.0,0.0]
+    new_theta = theta
     theta_delta = [0.0,0.0,0.0,0.0,0.0,0.0]
     
     
@@ -95,7 +98,7 @@ def update_theta(theta_delta_raw):
         new_theta[i] = theta[i]+theta_delta[i]    #Update angle values
         new_theta[i] = wrapTo180(new_theta[i])    #Wrap new angles to [-180,180]
     
-    #Assign updated theta values (if sim)
+    #Assign updated theta values 
     theta = new_theta 
 
     return theta_delta
@@ -132,22 +135,23 @@ def solve():
     
     #Plot XYZ coordinates
     plotter.plot(X, Y, Z)
+    
 
     #Return joint limit weights for given theta value
     if joint_limit == 1:
-        W = weights.find_weights(theta)
+        W = weights.find_weights(theta[0:joints])
     else:
-        W = np.identity(6)
+        W = np.identity(joints)
 
     #Solve IK utilising the pseudo inverse jacobian method
     #Return theta_delta values after applying weights to joints
-    theta_delta = jacobian.pseudo_inverse(frames, pos_adapt, W)
+    theta_delta = jacobian.pseudo_inverse(frames, pos_adapt[0:joints], W, joints)
     
     #Update the angles of each joint, uses weighting to reduce delta theta values to limit
     theta_delta = update_theta(theta_delta)
 
     #time.sleep(0.01)
-    print(W[0,0])
+    
     return theta_delta
 
 
