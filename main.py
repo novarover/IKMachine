@@ -9,7 +9,7 @@ from math import *
 
 
 #Define the starting values of theta (degrees)
-theta_1 = -179  
+theta_1 = 0 
 theta_2 = 90  
 theta_3 = -90
 theta_4 = 0
@@ -27,8 +27,8 @@ theta_max = 15  #Testing Variable
 
 #Define joint limits for each angle [-180,180]
 #Unlimited joints given 360 degree to avoid INF value on asymptote and allow limit rollover
-qmin=[-1000,-1000,-1000,-1000,-1000,-1000] #Testing Variable
-qmax=[1000,1000,1000,1000,1000,1000]
+qmin=[-90,-1000,-1000,-1000,-1000,-1000] #Testing Variable
+qmax=[90,1000,1000,1000,1000,1000]
 
 #Define Toggles (1 for On, 0 for Off)
 #Toggle for clamping feature if joint limit is exceeded
@@ -147,7 +147,7 @@ def solve():
     theta_delta = update_theta(theta_delta)
 
     #time.sleep(0.01)
-    print(W[0,0])
+    #print(W[0,0])
     return theta_delta
 
 
