@@ -17,16 +17,16 @@ def find_frames(theta):
     #This function returns the frames of each joint relative to the world frame for the current angles of each joint.
     # First 3 joints
     frame_01 = revolute_joint(theta[0], 0, 0, 0)  # base rotation
-    frame_12 = revolute_joint(theta[1], 0, 0, pi/2.0)  # arm joint 1
-    frame_23 = revolute_joint(theta[2], 0, 65, 0)  # arm joint 2
+    frame_12 = revolute_joint(theta[1], 10, 0, pi/2.0)  # arm joint 1
+    frame_23 = revolute_joint(theta[2], 0, 52, 0)  # arm joint 2
 
     #Wrist
-    frame_34 = revolute_joint(theta[3], 0, 42, 0)
-    frame_45 = revolute_joint(theta[4], 11, 0, -pi/2.0)  
+    frame_34 = revolute_joint(theta[3], 0, 50, 0)
+    frame_45 = revolute_joint(theta[4], 11, 10, -pi/2.0)  
     frame_56 = revolute_joint(theta[5], 0, 0, -pi/2.0)  # continuous rotation
     
     #End effector from wrist
-    frame_67 = revolute_joint(0,25,0,0)
+    frame_67 = revolute_joint(0,30,0,0)
 
     # Absolute frames are found through matrix multiplication
     frame_02 = np.matmul(frame_01, frame_12)
