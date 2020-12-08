@@ -9,7 +9,7 @@ from math import *
 
 
 #Define the starting values of theta (degrees)
-theta_1 = 30 
+theta_1 = 0 
 theta_2 = 90  
 theta_3 = -90
 theta_4 = 0
@@ -34,7 +34,7 @@ qmax=[90,1000,1000,1000,1000,1000]
 #Toggle for clamping feature if joint limit is exceeded
 clamping = 0
 #Toggle for adaptive ref frame
-adpt_frame = 1
+adpt_frame = 0
 #Toggle for joint limits
 joint_limit = 0
 
