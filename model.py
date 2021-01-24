@@ -22,7 +22,7 @@ def find_frames(theta):
 
     #Wrist
     frame_34 = revolute_joint(theta[3], 0, 50, 0)
-    frame_45 = revolute_joint(theta[4], 11, 10, -pi/2.0)  
+    frame_45 = revolute_joint(theta[4], 11, 0, -pi/2.0)  
     frame_56 = revolute_joint(theta[5], 0, 0, -pi/2.0)  # continuous rotation
     
     #End effector from wrist
