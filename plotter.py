@@ -2,7 +2,6 @@ import pickle
 import time
 import math
 import numpy as np
-import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
 from matplotlib.widgets import Button
 import main
@@ -40,6 +39,7 @@ def zn(self):
 
 # Required for updating without bringing the window to the front
 matplotlib.use("Qt5agg")
+import matplotlib.pyplot as plt
 matplotlib.rc('axes.formatter', useoffset=False)
 
 # Set up plot figure
